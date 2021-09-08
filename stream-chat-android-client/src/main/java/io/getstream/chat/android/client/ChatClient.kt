@@ -34,11 +34,52 @@ import io.getstream.chat.android.client.clientstate.UserState
 import io.getstream.chat.android.client.clientstate.UserStateService
 import io.getstream.chat.android.client.di.ChatModule
 import io.getstream.chat.android.client.errors.ChatError
+import io.getstream.chat.android.client.events.ChannelDeletedEvent
+import io.getstream.chat.android.client.events.ChannelHiddenEvent
+import io.getstream.chat.android.client.events.ChannelTruncatedEvent
+import io.getstream.chat.android.client.events.ChannelUpdatedByUserEvent
+import io.getstream.chat.android.client.events.ChannelUpdatedEvent
+import io.getstream.chat.android.client.events.ChannelUserBannedEvent
+import io.getstream.chat.android.client.events.ChannelUserUnbannedEvent
+import io.getstream.chat.android.client.events.ChannelVisibleEvent
 import io.getstream.chat.android.client.events.ChatEvent
 import io.getstream.chat.android.client.events.ConnectedEvent
+import io.getstream.chat.android.client.events.ConnectingEvent
 import io.getstream.chat.android.client.events.DisconnectedEvent
+import io.getstream.chat.android.client.events.ErrorEvent
+import io.getstream.chat.android.client.events.GlobalUserBannedEvent
+import io.getstream.chat.android.client.events.GlobalUserUnbannedEvent
+import io.getstream.chat.android.client.events.HealthEvent
+import io.getstream.chat.android.client.events.MarkAllReadEvent
+import io.getstream.chat.android.client.events.MemberAddedEvent
+import io.getstream.chat.android.client.events.MemberRemovedEvent
+import io.getstream.chat.android.client.events.MemberUpdatedEvent
+import io.getstream.chat.android.client.events.MessageDeletedEvent
+import io.getstream.chat.android.client.events.MessageReadEvent
+import io.getstream.chat.android.client.events.MessageUpdatedEvent
+import io.getstream.chat.android.client.events.NewMessageEvent
+import io.getstream.chat.android.client.events.NotificationAddedToChannelEvent
+import io.getstream.chat.android.client.events.NotificationChannelDeletedEvent
 import io.getstream.chat.android.client.events.NotificationChannelMutesUpdatedEvent
+import io.getstream.chat.android.client.events.NotificationChannelTruncatedEvent
+import io.getstream.chat.android.client.events.NotificationInviteAcceptedEvent
+import io.getstream.chat.android.client.events.NotificationInviteRejectedEvent
+import io.getstream.chat.android.client.events.NotificationInvitedEvent
+import io.getstream.chat.android.client.events.NotificationMarkReadEvent
+import io.getstream.chat.android.client.events.NotificationMessageNewEvent
 import io.getstream.chat.android.client.events.NotificationMutesUpdatedEvent
+import io.getstream.chat.android.client.events.NotificationRemovedFromChannelEvent
+import io.getstream.chat.android.client.events.ReactionDeletedEvent
+import io.getstream.chat.android.client.events.ReactionNewEvent
+import io.getstream.chat.android.client.events.ReactionUpdateEvent
+import io.getstream.chat.android.client.events.TypingStartEvent
+import io.getstream.chat.android.client.events.TypingStopEvent
+import io.getstream.chat.android.client.events.UnknownEvent
+import io.getstream.chat.android.client.events.UserDeletedEvent
+import io.getstream.chat.android.client.events.UserPresenceChangedEvent
+import io.getstream.chat.android.client.events.UserStartWatchingEvent
+import io.getstream.chat.android.client.events.UserStopWatchingEvent
+import io.getstream.chat.android.client.events.UserUpdatedEvent
 import io.getstream.chat.android.client.experimental.plugin.Plugin
 import io.getstream.chat.android.client.extensions.ATTACHMENT_TYPE_FILE
 import io.getstream.chat.android.client.extensions.ATTACHMENT_TYPE_IMAGE
@@ -165,6 +206,49 @@ public class ChatClient internal constructor(
                         }
                     }.exhaustive
                 }
+                is ChannelDeletedEvent -> TODO()
+                is ChannelHiddenEvent -> TODO()
+                is ChannelTruncatedEvent -> TODO()
+                is ChannelUpdatedByUserEvent -> TODO()
+                is ChannelUpdatedEvent -> TODO()
+                is ChannelUserBannedEvent -> TODO()
+                is ChannelUserUnbannedEvent -> TODO()
+                is ChannelVisibleEvent -> TODO()
+                is MemberAddedEvent -> TODO()
+                is MemberRemovedEvent -> TODO()
+                is MemberUpdatedEvent -> TODO()
+                is MessageDeletedEvent -> TODO()
+                is MessageReadEvent -> TODO()
+                is MessageUpdatedEvent -> TODO()
+                is NewMessageEvent -> TODO()
+                is NotificationAddedToChannelEvent -> TODO()
+                is NotificationChannelDeletedEvent -> TODO()
+                is NotificationChannelTruncatedEvent -> TODO()
+                is NotificationInviteAcceptedEvent -> TODO()
+                is NotificationInviteRejectedEvent -> TODO()
+                is NotificationInvitedEvent -> TODO()
+                is NotificationMarkReadEvent -> TODO()
+                is NotificationMessageNewEvent -> TODO()
+                is NotificationRemovedFromChannelEvent -> TODO()
+                is ReactionDeletedEvent -> TODO()
+                is ReactionNewEvent -> TODO()
+                is ReactionUpdateEvent -> TODO()
+                is TypingStartEvent -> TODO()
+                is TypingStopEvent -> TODO()
+                is UserStartWatchingEvent -> TODO()
+                is UserStopWatchingEvent -> TODO()
+                is ConnectingEvent -> TODO()
+                is ErrorEvent -> TODO()
+                is GlobalUserBannedEvent -> TODO()
+                is GlobalUserUnbannedEvent -> TODO()
+                is HealthEvent -> TODO()
+                is MarkAllReadEvent -> TODO()
+                is NotificationChannelMutesUpdatedEvent -> TODO()
+                is NotificationMutesUpdatedEvent -> TODO()
+                is UnknownEvent -> TODO()
+                is UserDeletedEvent -> TODO()
+                is UserPresenceChangedEvent -> TODO()
+                is UserUpdatedEvent -> TODO()
             }
         }
         logger.logI("Initialised: " + getVersion())

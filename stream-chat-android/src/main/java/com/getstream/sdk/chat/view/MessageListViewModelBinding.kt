@@ -54,6 +54,7 @@ public fun MessageListViewModel.bindView(view: MessageListView, lifecycleOwner: 
                 view.displayNewMessage(state.messageListItem)
                 view.hideLoadingView()
             }
+            MessageListViewModel.State.NavigateUp -> TODO()
         }
     }
     loadMoreLiveData.observe(lifecycleOwner, view::setLoadingMore)

@@ -30,6 +30,7 @@ public fun ChannelsViewModel.bindView(
                 view.showEmptyStateView()
                 view.hideLoadingView()
             }
+            ChannelsViewModel.State.NavigateToLoginScreen -> TODO()
         }
     }
     paginationState.observe(lifecycle) {

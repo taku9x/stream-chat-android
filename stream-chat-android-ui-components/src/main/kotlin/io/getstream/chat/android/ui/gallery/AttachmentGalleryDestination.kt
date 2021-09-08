@@ -55,6 +55,7 @@ public class AttachmentGalleryDestination(
                 is AttachmentGalleryActivity.AttachmentOptionResult.Download -> {
                     attachmentDownloadOptionHandler.onClick(result.result)
                 }
+                null -> TODO()
             }
         }
     }
