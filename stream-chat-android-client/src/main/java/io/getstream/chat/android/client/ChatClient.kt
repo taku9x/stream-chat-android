@@ -863,8 +863,9 @@ public class ChatClient internal constructor(
     }
 
     @CheckResult
-    public fun deleteMessage(messageId: String): Call<Message> {
-        return api.deleteMessage(messageId)
+    @JvmOverloads
+    public fun deleteMessage(messageId: String, hard: Boolean = false): Call<Message> {
+        return api.deleteMessage(messageId, hard)
     }
 
     @CheckResult
@@ -872,6 +873,15 @@ public class ChatClient internal constructor(
         return api.getMessage(messageId)
     }
 
+    /**
+     * Sends the message to the given channel.
+     *
+     * @param channelType The channel type. ie messaging.
+     * @param channelId The channel id. ie 123.
+     * @param message Message object
+     *
+     * @return Executable async [Call] responsible for sending a message.
+     */
     @CheckResult
     public fun sendMessage(
         channelType: String,

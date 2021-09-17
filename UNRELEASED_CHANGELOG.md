@@ -24,6 +24,7 @@
 
 ## stream-chat-android-client
 ### 🐞 Fixed
+- Fixed sending messages using `ChatClient::sendMessage` without explicitly specifying the sender user id.
 
 ### ⬆️ Improved
 - It is now possible to add a interceptor for API calls of Stream API. You can add it in the Build of ChatClient:
@@ -39,6 +40,7 @@ val client = ChatClient.Builder(apiKey, context)
 ### ✅ Added
 
 ### ⚠️ Changed
+- Now it is possible to hard delete messages. Insert a flag `hard = true` in the `ChatClient.deleteMessage` and it will be deleted in the backend. **This action can't be undone!**
 
 ### ❌ Removed
 
