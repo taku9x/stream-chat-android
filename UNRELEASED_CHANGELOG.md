@@ -26,6 +26,15 @@
 ### 🐞 Fixed
 
 ### ⬆️ Improved
+- It is now possible to add a interceptor for API calls of Stream API. You can add it in the Build of ChatClient:
+```
+val client = ChatClient.Builder(apiKey, context)
+    .loggerHandler(FirebaseLogger)
+    .notifications(notificationHandler)
+    .logLevel(logLevel)
+    .apiLoggerInterceptor(HttpLoggingInterceptor())
+    .build()
+```
 
 ### ✅ Added
 
