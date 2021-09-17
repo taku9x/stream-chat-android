@@ -1656,7 +1656,8 @@ public class ChatClient internal constructor(
             )
 
             val module =
-                ChatModule(appContext,
+                ChatModule(
+                    appContext,
                     config,
                     notificationsHandler,
                     fileUploader,
