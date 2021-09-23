@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION_ERROR")
+
 package io.getstream.chat.android.client.notifications.handler
 
 import android.app.Notification
@@ -6,11 +8,12 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import androidx.core.app.RemoteInput
+import androidx.core.content.edit
 import io.getstream.chat.android.client.R
 import io.getstream.chat.android.client.events.NewMessageEvent
 import io.getstream.chat.android.client.extensions.getUsersExcludingCurrent
@@ -29,6 +32,9 @@ public open class ChatNotificationHandler @JvmOverloads constructor(
     protected val context: Context,
     public val config: NotificationConfig = NotificationConfig(),
 ) {
+
+    private val sharedPreferences: SharedPreferences by lazy { context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE) }
+    private val notificationManager: NotificationManager by lazy { context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
 
     /**
      * Handles showing notification after receiving [NewMessageEvent] from other users.
@@ -54,6 +60,10 @@ public open class ChatNotificationHandler @JvmOverloads constructor(
         return null
     }
 
+    @Deprecated(
+        message = "It is not used anymore, you will be notify to build the notification instead",
+        level = DeprecationLevel.ERROR,
+    )
     public open fun getDataLoadListener(): NotificationLoadDataListener? {
         return null
     }
@@ -104,6 +114,14 @@ public open class ChatNotificationHandler @JvmOverloads constructor(
         ).build()
     }
 
+    internal fun showNotification(channel: Channel, message: Message) {
+        val notificationId: Int = System.nanoTime().toInt()
+        val notificationSummaryId = getNotificationGroupSummaryId(channel.type, channel.id)
+        addNotificationId(notificationId, notificationSummaryId)
+        showNotification(notificationId, buildNotification(notificationId, channel, message).build())
+        showNotification(notificationSummaryId, buildNotificationGroupSummary(channel, message).build())
+    }
+
     public open fun buildNotification(
         notificationId: Int,
         channel: Channel,
@@ -115,28 +133,9 @@ public open class ChatNotificationHandler @JvmOverloads constructor(
             groupKey = getNotificationGroupKey(channelType = channel.type, channelId = channel.id),
             intent = getNewMessageIntent(messageId = message.id, channelType = channel.type, channelId = channel.id),
         ).apply {
-            addAction(
-                getReadAction(
-                    prepareActionPendingIntent(
-                        notificationId,
-                        message.id,
-                        channel.id,
-                        channel.type,
-                        NotificationMessageReceiver.ACTION_READ,
-                    )
-                )
-            )
-            addAction(
-                getReplyAction(
-                    prepareActionPendingIntent(
-                        notificationId,
-                        message.id,
-                        channel.id,
-                        channel.type,
-                        NotificationMessageReceiver.ACTION_REPLY,
-                    )
-                )
-            )
+            addAction(NotificationMessageReceiver.createReadAction(context, notificationId, channel, message))
+            addAction(NotificationMessageReceiver.createReplyAction(context, notificationId, channel))
+            setDeleteIntent(NotificationMessageReceiver.createDismissPendingIntent(context, notificationId))
         }
     }
 
@@ -186,8 +185,29 @@ public open class ChatNotificationHandler @JvmOverloads constructor(
         return context.packageManager!!.getLaunchIntentForPackage(context.packageName)!!
     }
 
+    /**
+     * Dismiss notifications from a given [channelType] and [channelId].
+     *
+     * @param channelType String that represent the channel type of the channel you want to dismiss notifications.
+     * @param channelId String that represent the channel id of the channel you want to dismiss notifications.
+     */
+    internal fun dismissChannelNotifications(channelType: String, channelId: String) {
+        dismissSummaryNotification(getNotificationGroupSummaryId(channelType, channelId))
+    }
+
+    /**
+     * Dismiss all notifications.
+     */
+    internal fun dismissAllNotifications() {
+        getNotificationSummaryIds().forEach(::dismissSummaryNotification)
+    }
+
     public open fun getErrorCaseIntent(): Intent {
         return context.packageManager!!.getLaunchIntentForPackage(context.packageName)!!
+    }
+
+    private fun showNotification(notificationId: Int, notification: Notification) {
+        notificationManager.notify(notificationId, notification)
     }
 
     private fun getNotificationBuilder(
@@ -213,59 +233,7 @@ public open class ChatNotificationHandler @JvmOverloads constructor(
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setShowWhen(true)
             .setContentIntent(contentIntent)
-            .apply {
-                if (config.shouldGroupNotifications) {
-                    setGroup(groupKey)
-                }
-            }
-    }
-
-    private fun getReadAction(pendingIntent: PendingIntent): NotificationCompat.Action {
-        return NotificationCompat.Action.Builder(
-            android.R.drawable.ic_menu_view,
-            context.getString(R.string.stream_chat_notification_read),
-            pendingIntent,
-        ).build()
-    }
-
-    private fun getReplyAction(replyPendingIntent: PendingIntent): NotificationCompat.Action {
-        val remoteInput =
-            RemoteInput.Builder(NotificationMessageReceiver.KEY_TEXT_REPLY)
-                .setLabel(context.getString(R.string.stream_chat_notification_type_hint))
-                .build()
-        return NotificationCompat.Action.Builder(
-            android.R.drawable.ic_menu_send,
-            context.getString(R.string.stream_chat_notification_reply),
-            replyPendingIntent
-        )
-            .addRemoteInput(remoteInput)
-            .setAllowGeneratedReplies(true)
-            .build()
-    }
-
-    private fun prepareActionPendingIntent(
-        notificationId: Int,
-        messageId: String,
-        channelId: String,
-        type: String,
-        actionType: String,
-    ): PendingIntent {
-        val notifyIntent = Intent(context, NotificationMessageReceiver::class.java)
-
-        notifyIntent.apply {
-            putExtra(NotificationMessageReceiver.KEY_NOTIFICATION_ID, notificationId)
-            putExtra(NotificationMessageReceiver.KEY_MESSAGE_ID, messageId)
-            putExtra(NotificationMessageReceiver.KEY_CHANNEL_ID, channelId)
-            putExtra(NotificationMessageReceiver.KEY_CHANNEL_TYPE, type)
-            action = actionType
-        }
-
-        return PendingIntent.getBroadcast(
-            context,
-            0,
-            notifyIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT,
-        )
+            .setGroup(groupKey)
     }
 
     internal fun onCreateDevice(onDeviceCreated: (device: Device) -> Unit) {
@@ -282,7 +250,62 @@ public open class ChatNotificationHandler @JvmOverloads constructor(
         .joinToString { it.name }
         .takeIf { it.isNotEmpty() }
 
+    private fun dismissSummaryNotification(notificationSummaryId: Int) {
+        getAssociatedNotificationIds(notificationSummaryId).forEach {
+            notificationManager.cancel(it)
+            removeNotificationId(it)
+        }
+        notificationManager.cancel(notificationSummaryId)
+        sharedPreferences.edit { remove(getNotificationSummaryIdKey(notificationSummaryId)) }
+    }
+
+    internal fun onDismissNotification(notificationId: Int) {
+        val notificationSummaryId = getAssociatedNotificationSummaryId(notificationId)
+        removeNotificationId(notificationId)
+        notificationManager.cancel(notificationId)
+        if (getAssociatedNotificationIds(notificationSummaryId).isNullOrEmpty()) {
+            notificationManager.cancel(notificationSummaryId)
+        }
+    }
+
+    private fun addNotificationId(notificationId: Int, notificationSummaryId: Int) {
+        sharedPreferences.edit {
+            putInt(getNotificationIdKey(notificationId), notificationSummaryId)
+            putStringSet(
+                KEY_NOTIFICATION_SUMMARY_IDS,
+                (getNotificationSummaryIds() + notificationSummaryId).map(Int::toString).toSet()
+            )
+            putStringSet(
+                getNotificationSummaryIdKey(notificationSummaryId),
+                (getAssociatedNotificationIds(notificationSummaryId) + notificationId).map(Int::toString).toSet()
+            )
+        }
+    }
+
+    private fun removeNotificationId(notificationId: Int) {
+        sharedPreferences.edit {
+            val notificationSummaryId = getAssociatedNotificationSummaryId(notificationId)
+            remove(getNotificationIdKey(notificationId))
+            putStringSet(
+                getNotificationSummaryIdKey(notificationSummaryId),
+                (getAssociatedNotificationIds(notificationSummaryId) - notificationId).map(Int::toString).toSet()
+            )
+        }
+    }
+
+    private fun getNotificationSummaryIds(): Set<Int> = sharedPreferences.getStringSet(KEY_NOTIFICATION_SUMMARY_IDS, null).orEmpty().map(String::toInt).toSet()
+    private fun getAssociatedNotificationSummaryId(notificationId: Int): Int = sharedPreferences.getInt(getNotificationIdKey(notificationId), 0)
+    private fun getAssociatedNotificationIds(notificationSummaryId: Int): Set<Int> =
+        sharedPreferences.getStringSet(getNotificationSummaryIdKey(notificationSummaryId), null).orEmpty().map(String::toInt).toSet()
+
+    private fun getNotificationIdKey(notificationId: Int) = KEY_PREFIX_NOTIFICATION_ID + notificationId
+    private fun getNotificationSummaryIdKey(notificationSummaryId: Int) = KEY_PREFIX_NOTIFICATION_SUMMARY_ID + notificationSummaryId
+
     private companion object {
         private const val ERROR_NOTIFICATION_GROUP_KEY = "error_notification_group_key"
+        private const val SHARED_PREFERENCES_NAME = "stream_notifications.sp"
+        private const val KEY_PREFIX_NOTIFICATION_ID = "nId-"
+        private const val KEY_PREFIX_NOTIFICATION_SUMMARY_ID = "nSId-"
+        private const val KEY_NOTIFICATION_SUMMARY_IDS = "notification_summary_ids"
     }
 }

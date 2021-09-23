@@ -1,3 +1,108 @@
+# UNRELEASED CHANGELOG
+## Common changes for all artifacts
+### 🐞 Fixed
+
+### ⬆️ Improved
+
+### ✅ Added
+
+### ⚠️ Changed
+
+### ❌ Removed
+
+
+## stream-chat-android
+### 🐞 Fixed
+
+### ⬆️ Improved
+
+### ✅ Added
+- Added a method to dismiss all notifications from a channel. It is handled internally from the SDK but you are able to dismiss channel notification at whatever time calling `ChatClient::dismissChannelNotifications`
+- Notifications are dismissed after the user logout the SDK
+
+### ⚠️ Changed
+
+### ❌ Removed
+
+
+## stream-chat-android-client
+### 🐞 Fixed
+- Fixed sending messages using `ChatClient::sendMessage` without explicitly specifying the sender user id.
+- Fixed sending custom attachments without files to upload
+
+### ⬆️ Improved
+- Custom attachment types are now preserved after file uploads
+
+### ✅ Added
+
+### ⚠️ Changed
+- Now it is possible to hard delete messages. Insert a flag `hard = true` in the `ChatClient.deleteMessage` and it will be deleted in the backend. **This action can't be undone!**
+
+### ❌ Removed
+
+## stream-chat-android-offline
+### 🐞 Fixed
+
+### ⬆️ Improved
+
+### ✅ Added
+
+### ⚠️ Changed
+
+### ❌ Removed
+
+
+## stream-chat-android-ui-common
+### 🐞 Fixed
+
+### ⬆️ Improved
+
+### ✅ Added
+
+### ⚠️ Changed
+
+### ❌ Removed
+
+
+## stream-chat-android-ui-components
+### 🐞 Fixed
+
+### ⬆️ Improved
+
+### ✅ Added
+- Notifications are dismissed after the user go into the channel conversation when you are using `MessageListView`
+
+### ⚠️ Changed
+
+### ❌ Removed
+
+
+## stream-chat-android-compose
+### 🐞 Fixed
+
+### ⬆️ Improved
+- Updated the Compose framework version (1.0.2)
+- Updated the Accompanist library version (0.18.0)
+
+### ✅ Added
+- Notifications are dismissed after the user go into the channel conversation when you are using `MessageList`
+
+### ⚠️ Changed
+
+### ❌ Removed
+
+
+## stream-chat-android-pushprovider-firebase
+### 🐞 Fixed
+
+### ⬆️ Improved
+
+### ✅ Added
+
+### ⚠️ Changed
+
+### ❌ Removed
+
 # September 15th, 2021 - 4.18.0
 ## stream-chat-android-client
 ### 🐞 Fixed

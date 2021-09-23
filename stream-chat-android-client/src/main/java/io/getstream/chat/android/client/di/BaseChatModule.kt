@@ -13,6 +13,7 @@ import io.getstream.chat.android.client.api.interceptor.ApiKeyInterceptor
 import io.getstream.chat.android.client.api.interceptor.HeadersInterceptor
 import io.getstream.chat.android.client.api.interceptor.HttpLoggingInterceptor
 import io.getstream.chat.android.client.api.interceptor.TokenAuthInterceptor
+import io.getstream.chat.android.client.api.models.ProgressRequestBody
 import io.getstream.chat.android.client.api2.ChannelApi
 import io.getstream.chat.android.client.api2.DeviceApi
 import io.getstream.chat.android.client.api2.GeneralApi
@@ -24,6 +25,7 @@ import io.getstream.chat.android.client.api2.UserApi
 import io.getstream.chat.android.client.clientstate.SocketStateService
 import io.getstream.chat.android.client.clientstate.UserStateService
 import io.getstream.chat.android.client.helpers.QueryChannelsPostponeHelper
+import io.getstream.chat.android.client.logger.ChatLogLevel
 import io.getstream.chat.android.client.logger.ChatLogger
 import io.getstream.chat.android.client.network.NetworkStateProvider
 import io.getstream.chat.android.client.notifications.ChatNotifications
@@ -60,9 +62,7 @@ internal open class BaseChatModule(
 
     private val moshiParser: ChatParser by lazy { MoshiChatParser() }
 
-    private val defaultNotifications by lazy {
-        buildNotification(notificationsHandler, api())
-    }
+    private val defaultNotifications by lazy { buildNotification(notificationsHandler) }
     private val defaultApi by lazy { buildApi() }
     private val defaultSocket by lazy {
         buildSocket(config, moshiParser)
@@ -104,10 +104,9 @@ internal open class BaseChatModule(
 
     private fun buildNotification(
         handler: ChatNotificationHandler,
-        api: ChatApi,
     ): ChatNotifications {
         return if (handler.config.pushNotificationsEnabled) {
-            ChatNotificationsImpl(handler, api, appContext)
+            ChatNotificationsImpl(handler, appContext)
         } else {
             NoOpChatNotifications(handler)
         }
@@ -149,19 +148,25 @@ internal open class BaseChatModule(
             // interceptors
             .addInterceptor(ApiKeyInterceptor(config.apiKey))
             .addInterceptor(HeadersInterceptor(getAnonymousProvider(config, isAnonymousApi)))
-            .addInterceptor(loggingInterceptor)
+            .apply {
+                if (config.loggerConfig.level != ChatLogLevel.NOTHING) {
+                    addInterceptor(loggingInterceptor)
+                    addInterceptor(
+                        CurlInterceptor { message ->
+                            logger().logI("CURL", message)
+                        }
+                    )
+                    // Ignore the writes triggered by the two above interceptors
+                    // when issuing progress updates
+                    ProgressRequestBody.progressUpdatesToSkip = 2
+                }
+            }
             .addInterceptor(
                 TokenAuthInterceptor(
                     tokenManager,
                     parser,
                     getAnonymousProvider(config, isAnonymousApi)
                 )
-
-            )
-            .addInterceptor(
-                CurlInterceptor {
-                    logger().logI("CURL", it)
-                }
             )
     }
 
