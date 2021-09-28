@@ -36,7 +36,8 @@
 - Custom attachment types are now preserved after file uploads
 
 ### ✅ Added
-- Fixing 
+- Added the possibility to add your own instance of OkHttpClient with `ChatClient.customOkHttpClient`.
+- Added the possibility to customize OkHttpClient with `ChatClient.customizeOkHttpClient`
 ### ⚠️ Changed
 - Now it is possible to hard delete messages. Insert a flag `hard = true` in the `ChatClient.deleteMessage` and it will be deleted in the backend. **This action can't be undone!**
 
